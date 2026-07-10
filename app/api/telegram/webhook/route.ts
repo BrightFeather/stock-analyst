@@ -3,6 +3,7 @@ import { runAnalysis } from '@/lib/agent';
 import { getSql } from '@/lib/db';
 import type { SkillId } from '@/lib/skills/loader';
 import { sendChatAction, sendDocument, sendMessage } from '@/lib/telegram';
+import { firstHeading, publishTelegraph } from '@/lib/telegraph';
 
 // The agent loop (run via after()) has been observed at ~120s for a single
 // ticker; give generous headroom. Needs Vercel Pro (Hobby caps at 60s; Pro allows
@@ -31,7 +32,20 @@ async function handleAnalyze(chatId: number, ticker: string, skill: SkillId) {
       DO UPDATE SET markdown = EXCLUDED.markdown, created_at = now()
       RETURNING report_date
     `;
-    await sendDocument(chatId, `${ticker}-${skill}-${row.report_date}.md`, markdown, `${ticker} · ${skill}`);
+    const title = firstHeading(markdown) ?? `${ticker} · ${skill}`;
+    try {
+      const url = await publishTelegraph({
+        title,
+        markdown,
+        authorName: 'Laicaia Stocks',
+        authorUrl: 'https://t.me/laicaia_stocks_bot',
+      });
+      await sendMessage(chatId, `${title}\n${ticker} · ${skill}\n${url}`);
+    } catch (pubError) {
+      // Telegraph is best-effort; fall back to the raw markdown document.
+      console.error('telegraph publish failed, sending document', pubError);
+      await sendDocument(chatId, `${ticker}-${skill}-${row.report_date}.md`, markdown, `${ticker} · ${skill}`);
+    }
   } catch (error) {
     console.error('telegram analyze failed', { ticker, skill, error });
     await sendMessage(chatId, `Analysis failed: ${String((error as Error)?.message ?? error)}`);
