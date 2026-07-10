@@ -153,15 +153,25 @@ function buildTools(): ToolDef[] {
   ];
 }
 
+/**
+ * The model occasionally prefixes its planning/scratchpad before the report
+ * (despite thinking:disabled). Reports always lead with an H1 title, so if a
+ * top-level heading exists past the start, drop everything before it.
+ */
+function cleanReport(markdown: string): string {
+  const h1 = markdown.search(/^# /m);
+  return (h1 > 0 ? markdown.slice(h1) : markdown).trim();
+}
+
 export async function runAnalysis(ticker: string, skillId: SkillId): Promise<string> {
   const systemPrompt = await loadSkillSystemPrompt(skillId);
   const tools = buildTools();
   const markdown = await runToolAgent({
     systemPrompt,
-    userPrompt: `Run the full skill analysis for ticker: ${ticker}. Return only the final markdown report.`,
+    userPrompt: `Run the full skill analysis for ticker: ${ticker}. Return ONLY the final markdown report, starting with its H1 title — no planning notes, reasoning, or preamble.`,
     tools,
     maxIterations: 12,
     maxTokens: 8192,
   });
-  return markdown;
+  return cleanReport(markdown);
 }

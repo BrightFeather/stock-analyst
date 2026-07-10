@@ -4,9 +4,10 @@ import { getSql } from '@/lib/db';
 import type { SkillId } from '@/lib/skills/loader';
 import { sendChatAction, sendDocument, sendMessage } from '@/lib/telegram';
 
-// The agent loop realistically takes 30-90s; this needs Vercel Pro (Hobby caps
-// serverless duration at 60s) — see plan note on maxDuration for /api/analyze too.
-export const maxDuration = 120;
+// The agent loop (run via after()) has been observed at ~120s for a single
+// ticker; give generous headroom. Needs Vercel Pro (Hobby caps at 60s; Pro allows
+// up to 300s) — see /api/analyze for the same setting.
+export const maxDuration = 300;
 
 const VALID_SKILLS: SkillId[] = ['berkshire', 'panel'];
 const DEFAULT_SKILL: SkillId = 'berkshire';
