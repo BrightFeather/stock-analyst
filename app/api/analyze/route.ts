@@ -2,6 +2,10 @@ import { runAnalysis } from '@/lib/agent';
 import { getSql } from '@/lib/db';
 import type { SkillId } from '@/lib/skills/loader';
 
+// The agent loop realistically takes 30-90s; runs synchronously here. Requires
+// Vercel Pro (Hobby caps serverless duration at 60s) — matches the webhook route.
+export const maxDuration = 120;
+
 const VALID_SKILLS: SkillId[] = ['berkshire', 'panel'];
 
 export async function POST(request: Request) {
