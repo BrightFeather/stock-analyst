@@ -238,18 +238,8 @@
   margin-bottom: 1.1rem;
 }
 
-.report :global(p:first-of-type)::first-letter {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 3.2rem;
-  float: left;
-  line-height: 0.8;
-  padding: 0.1rem 0.45rem 0 0;
-}
-
 .report :global(blockquote) {
   font-family: var(--font-display);
-  font-style: italic;
   font-size: 1.2rem;
   line-height: 1.5;
   border-left: 3px solid var(--accent);

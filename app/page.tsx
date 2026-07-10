@@ -27,19 +27,16 @@ export default function Home() {
   const [markdown, setMarkdown] = useState<string | null>(null);
   const [history, setHistory] = useState<ReportRow[]>([]);
 
-  async function loadHistory(forTicker: string) {
-    if (!forTicker) return;
-    const res = await fetch(`/api/reports?ticker=${encodeURIComponent(forTicker)}`);
+  async function loadHistory() {
+    const res = await fetch('/api/reports');
     const data = await res.json();
     if (res.ok) setHistory(data.reports ?? []);
   }
 
+  // Archive shows the full report history, independent of the ticker input.
   useEffect(() => {
-    if (ticker.trim().length >= 1) {
-      const t = setTimeout(() => loadHistory(ticker.trim().toUpperCase()), 400);
-      return () => clearTimeout(t);
-    }
-  }, [ticker]);
+    loadHistory();
+  }, []);
 
   async function analyze() {
     setLoading(true);
@@ -54,7 +51,7 @@ export default function Home() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'analysis failed');
       setMarkdown(data.markdown);
-      loadHistory(ticker.trim().toUpperCase());
+      loadHistory();
     } catch (e) {
       setError(String((e as Error)?.message ?? e));
     } finally {
@@ -119,7 +116,7 @@ export default function Home() {
                   {history.map((r) => (
                     <li key={r.id}>
                       <button className={styles.historyItem} onClick={() => loadReport(r.id)}>
-                        <div className={styles.historyDate}>{r.report_date}</div>
+                        <div className={styles.historyDate}>{r.report_date.slice(0, 10)}</div>
                         <div className={styles.historyTicker}>{r.ticker}</div>
                         <span className={`${styles.pill} ${r.skill === 'berkshire' ? styles.pillBerkshire : styles.pillPanel}`}>
                           {r.skill === 'berkshire' ? 'BERKSHIRE' : 'PANEL'}
