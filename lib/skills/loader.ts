@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export type SkillId = 'berkshire' | 'panel';
+export type SkillId = 'berkshire' | 'panel' | 'uzi';
 
 const BERKSHIRE_DIR = path.join(process.cwd(), 'lib', 'skills', 'berkshire');
 

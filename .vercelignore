@@ -1,0 +1,2 @@
+# The uzi worker runs on a separate Python host, not on Vercel.
+worker/
